@@ -1,5 +1,6 @@
 import useGetFont from "@/hooks/useGetFont";
 import { Stack } from "expo-router";
+import { ContextProvider } from "@/context/index";
 
 export default function RootLayout() {
   const { fontsLoaded } = useGetFont();
@@ -7,10 +8,12 @@ export default function RootLayout() {
   if (fontsLoaded === null) return;
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="index" />
-      <Stack.Screen name="notes/add-note" />
-      <Stack.Screen name="notes/[id]" />
-    </Stack>
+    <ContextProvider>
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="index" />
+        <Stack.Screen name="notes/add-note" />
+        <Stack.Screen name="notes/[id]" />
+      </Stack>
+    </ContextProvider>
   );
 }

@@ -2,19 +2,70 @@ import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { useRouter } from "expo-router";
+import { useContext, useEffect, useState } from "react";
+import { v4 as uuidv4 } from "uuid";
+import AppContext from "@/context";
+import { addDoc, collection } from "firebase/firestore";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { db } from "@/firebaseConfig";
 
 export default function AddNoteScreen() {
   const router = useRouter();
+  const { userId, setUserId } = useContext(AppContext);
+  const [note, setNote] = useState({
+    title: "",
+    description: "",
+  });
+  const [isAdding, setIsAdding] = useState(false);
+
+  useEffect(() => {
+    async function getUserId() {
+      try {
+        let storedId = await AsyncStorage.getItem("user-id");
+        console.log(storedId);
+        if (storedId) {
+          setUserId(storedId);
+        } else {
+          const generatedId = uuidv4();
+          await AsyncStorage.setItem("user-id", generatedId);
+          setUserId(generatedId);
+        }
+      } catch (error) {
+        console.error(`Error generating or getting user id: ${error}`);
+      }
+    }
+    getUserId();
+  }, []);
+
   const handleArrowPress = () => {
     router.push("/");
   };
+
+  const handleAddNote = async () => {
+    if (note.title.trim() !== "" && note.description.trim() !== "") {
+      if (userId !== "") {
+        setIsAdding(true);
+        try {
+          const userNotesRef = collection(db, `users/${userId}/notes`);
+          const addedNoteId = await addDoc(userNotesRef, note);
+          console.log(addedNoteId.id);
+        } catch (error) {
+          console.error(`Error saving note ${note}`);
+          setIsAdding(false);
+        } finally {
+          setIsAdding(false);
+        }
+      }
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.row}>
         <Pressable onPress={handleArrowPress}>
           <AntDesign name="arrowleft" size={24} color="#7D7968" />
         </Pressable>
-        <Pressable>
+        <Pressable onPress={handleAddNote} disabled={isAdding}>
           <Text style={[styles.doneText, styles.customText]}>Done</Text>
         </Pressable>
       </View>
@@ -27,14 +78,19 @@ export default function AddNoteScreen() {
           maxLength={30}
           style={[styles.inputContainer, styles.input, styles.customText]}
           placeholder="Enter note title here..."
+          onChangeText={(text) => setNote({ ...note, title: text })}
+          value={note.title !== "" ? note.title : ""}
         />
         <TextInput
           style={[styles.textAreaContainer, styles.input, styles.customText]}
           placeholder="Enter note description here..."
           numberOfLines={12}
           multiline={true}
+          onChangeText={(text) => setNote({ ...note, description: text })}
+          value={note.description !== "" ? note.description : ""}
         />
       </View>
+      {/* <Text>{userId}</Text> */}
     </SafeAreaView>
   );
 }

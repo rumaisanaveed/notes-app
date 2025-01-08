@@ -1,16 +1,32 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 import { SafeAreaView } from "react-native-safe-area-context";
-import data from "../data/notes";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
+import AppContext from "@/context";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function ShowNotesScreen() {
   const [notes, setNotes] = useState([]);
   const router = useRouter();
+  const { userId, setUserId } = useContext(AppContext);
+  const [isNotesLoading, setIsNotesLoading] = useState(false);
+
+  useEffect(() => {
+    const getUserId = async () => {
+      const storedId = await AsyncStorage.getItem("user-id");
+      console.log(userId);
+      if (storedId) {
+        setUserId(storedId);
+      } else {
+        console.log("No id found");
+      }
+    };
+    getUserId();
+  }, [userId]);
 
   const handleAddPress = () => {
     router.push("/notes/add-note");
@@ -22,9 +38,14 @@ export default function ShowNotesScreen() {
 
   useEffect(() => {
     const getNotes = async () => {
+      if (!userId) {
+        setIsNotesLoading(false);
+        return;
+      }
+      setIsNotesLoading(true);
       try {
         const querySnapshot = await getDocs(
-          collection(db, "users/user1/notes")
+          collection(db, `users/${userId}/notes`)
         );
         const notesArray = [];
         querySnapshot.forEach((doc) =>
@@ -33,10 +54,12 @@ export default function ShowNotesScreen() {
         setNotes(notesArray);
       } catch (error) {
         console.error("Error fetching notes:", error);
+      } finally {
+        setIsNotesLoading(false);
       }
     };
     getNotes();
-  }, []);
+  }, [userId]);
 
   const renderItem = ({ item }) => {
     return (
@@ -69,14 +92,28 @@ export default function ShowNotesScreen() {
     );
   };
 
+  const loadingComponent = () => {
+    return (
+      <View>
+        <Text>Loading...</Text>
+      </View>
+    );
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <Text style={[styles.heading, styles.customText]}>My Notes</Text>
       <FlatList
-        data={data}
+        data={notes}
         keyExtractor={(note) => note.id}
         renderItem={renderItem}
-        ListEmptyComponent={emptyComponent}
+        ListEmptyComponent={
+          isNotesLoading
+            ? loadingComponent
+            : notes.length === 0
+            ? emptyComponent
+            : null
+        }
         showsVerticalScrollIndicator={false}
       ></FlatList>
       <Pressable style={styles.addButton} onPress={handleAddPress}>
