@@ -8,20 +8,30 @@
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
-    "ios": {
-      "supportsTablet": true
-    },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#FFF5CF",
-        "color": "black"
-      }
+        "backgroundColor": "#FFF5CF"
+      },
+      "statusBar": {
+        "backgroundColor": "#000000",
+        "barStyle": "dark-content"
+      },
+      "backgroundColor": "#FFF5CF"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "backgroundColor": "#FFF5CF"
     },
     "web": {
       "bundler": "metro",
       "output": "static",
       "favicon": "./assets/images/favicon.png"
+    },
+    "splash": {
+      "image": "./assets/images/splash-icon.png",
+      "resizeMode": "cover",
+      "backgroundColor": "#FFF5CF"
     },
     "plugins": [
       "expo-router",
@@ -30,7 +40,7 @@
         {
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 200,
-          "resizeMode": "contain",
+          "resizeMode": "cover",
           "backgroundColor": "#FFF5CF"
         }
       ]

@@ -6,9 +6,10 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import data from "../data/notes";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { useRouter } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 
 export default function ShowNotesScreen() {
-  // const [notes, setNotes] = useState([]);
+  const [notes, setNotes] = useState([]);
   const router = useRouter();
 
   const handleAddPress = () => {
@@ -19,23 +20,23 @@ export default function ShowNotesScreen() {
     router.push(`/notes/${noteId}`);
   };
 
-  // useEffect(() => {
-  //   const getNotes = async () => {
-  //     try {
-  //       const querySnapshot = await getDocs(
-  //         collection(db, "users/user1/notes")
-  //       );
-  //       const notesArray = [];
-  //       querySnapshot.forEach((doc) =>
-  //         notesArray.push({ id: doc.id, ...doc.data() })
-  //       );
-  //       setNotes(notesArray);
-  //     } catch (error) {
-  //       console.error("Error fetching notes:", error);
-  //     }
-  //   };
-  //   getNotes();
-  // }, []);
+  useEffect(() => {
+    const getNotes = async () => {
+      try {
+        const querySnapshot = await getDocs(
+          collection(db, "users/user1/notes")
+        );
+        const notesArray = [];
+        querySnapshot.forEach((doc) =>
+          notesArray.push({ id: doc.id, ...doc.data() })
+        );
+        setNotes(notesArray);
+      } catch (error) {
+        console.error("Error fetching notes:", error);
+      }
+    };
+    getNotes();
+  }, []);
 
   const renderItem = ({ item }) => {
     return (
@@ -81,6 +82,7 @@ export default function ShowNotesScreen() {
       <Pressable style={styles.addButton} onPress={handleAddPress}>
         <AntDesign name="plus" size={20} color="#FFF5CF" />
       </Pressable>
+      <StatusBar style="dark" backgroundColor="#FFF5CF" />
     </SafeAreaView>
   );
 }
@@ -95,7 +97,7 @@ const styles = StyleSheet.create({
   heading: {
     fontSize: 48,
     fontWeight: 600,
-    width: 200,
+    maxWidth: 150,
   },
   customText: {
     fontFamily: "Poppins-Regular",
@@ -106,30 +108,34 @@ const styles = StyleSheet.create({
     width: "100%",
     padding: 10,
     borderRadius: 8,
-    marginBottom: 6,
+    marginBottom: 10,
   },
   noteItemRow: {
     display: "flex",
     flexDirection: "row",
     width: "100%",
     justifyContent: "space-between",
+    alignItems: "center",
   },
   noteTitle: {
     color: "#000000",
     fontSize: 20,
     fontWeight: 600,
-    width: "100%",
+    flex: 1,
   },
   iconsRow: {
     display: "flex",
     flexDirection: "row",
     gap: 6,
     alignItems: "center",
+    width: "auto",
+    maxWidth: "80%",
   },
   noteDescription: {
     fontWeight: "light",
     fontSize: 14,
     color: "#6C6C6C",
+    marginTop: 6,
   },
   addButton: {
     backgroundColor: "#F89348",
@@ -140,9 +146,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    position: "fixed",
-    bottom: 35,
-    right: 25,
+    position: "absolute",
+    bottom: 20,
+    right: 20,
   },
   emptyContainer: {
     height: "100%",

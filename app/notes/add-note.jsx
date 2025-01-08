@@ -45,6 +45,7 @@ const styles = StyleSheet.create({
     padding: 20,
     height: "100%",
     width: "100%",
+    flex: 1,
   },
   row: {
     display: "flex",
@@ -64,8 +65,6 @@ const styles = StyleSheet.create({
     width: "100%",
     paddingVertical: 20,
     paddingHorizontal: 15,
-    paddingVertical: 20,
-    paddingHorizontal: 15,
     borderWidth: 1,
     borderColor: "#CCC",
     borderRadius: 8,
@@ -80,5 +79,9 @@ const styles = StyleSheet.create({
     color: "#6C6C6C",
     fontWeight: "light",
     fontSize: 16,
+    height: 300,
+    textAlignVertical: "top",
+    minHeight: 150,
+    paddingVertical: 10,
   },
 });
