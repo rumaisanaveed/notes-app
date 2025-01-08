@@ -98,6 +98,7 @@ const styles = StyleSheet.create({
     fontSize: 48,
     fontWeight: 600,
     maxWidth: 150,
+    marginBottom: 20,
   },
   customText: {
     fontFamily: "Poppins-Regular",
