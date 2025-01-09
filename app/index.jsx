@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, deleteDoc, doc, getDocs } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AntDesign from "@expo/vector-icons/AntDesign";
@@ -9,16 +9,46 @@ import { StatusBar } from "expo-status-bar";
 import AppContext from "@/context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+// tasks
+// fix the issue of loading and not found screen
+// add animations
+// add env file
+// test
+// prepare github readme
+// post on linkedin
+
 export default function ShowNotesScreen() {
   const [notes, setNotes] = useState([]);
   const router = useRouter();
   const { userId, setUserId } = useContext(AppContext);
   const [isNotesLoading, setIsNotesLoading] = useState(false);
 
+  const getNotes = async () => {
+    if (!userId) {
+      setIsNotesLoading(false);
+      return;
+    }
+    setIsNotesLoading(true);
+    try {
+      const querySnapshot = await getDocs(
+        collection(db, `users/${userId}/notes`)
+      );
+      const notesArray = [];
+      querySnapshot.forEach((doc) =>
+        notesArray.push({ id: doc.id, ...doc.data() })
+      );
+      setNotes(notesArray);
+    } catch (error) {
+      console.error("Error fetching notes:", error);
+    } finally {
+      setIsNotesLoading(false);
+    }
+  };
+
   useEffect(() => {
     const getUserId = async () => {
       const storedId = await AsyncStorage.getItem("user-id");
-      console.log(userId);
+      // console.log(userId);
       if (storedId) {
         setUserId(storedId);
       } else {
@@ -26,6 +56,10 @@ export default function ShowNotesScreen() {
       }
     };
     getUserId();
+  }, [userId]);
+
+  useEffect(() => {
+    getNotes();
   }, [userId]);
 
   const handleAddPress = () => {
@@ -36,30 +70,19 @@ export default function ShowNotesScreen() {
     router.push(`/notes/${noteId}`);
   };
 
-  useEffect(() => {
-    const getNotes = async () => {
-      if (!userId) {
-        setIsNotesLoading(false);
-        return;
-      }
-      setIsNotesLoading(true);
-      try {
-        const querySnapshot = await getDocs(
-          collection(db, `users/${userId}/notes`)
-        );
-        const notesArray = [];
-        querySnapshot.forEach((doc) =>
-          notesArray.push({ id: doc.id, ...doc.data() })
-        );
-        setNotes(notesArray);
-      } catch (error) {
-        console.error("Error fetching notes:", error);
-      } finally {
-        setIsNotesLoading(false);
-      }
-    };
-    getNotes();
-  }, [userId]);
+  const handleDeletePress = async (noteId) => {
+    if (!noteId) {
+      return;
+    }
+    try {
+      const noteRef = doc(db, `users/${userId}/notes`, noteId);
+      await deleteDoc(noteRef);
+      console.log("Note deleted successfully");
+      getNotes();
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   const renderItem = ({ item }) => {
     return (
@@ -72,7 +95,7 @@ export default function ShowNotesScreen() {
             <Pressable onPress={() => handleEditPress(item.id)}>
               <AntDesign name="edit" size={18} color="#7D7968" />
             </Pressable>
-            <Pressable>
+            <Pressable onPress={() => handleDeletePress(item.id)}>
               <AntDesign name="delete" size={16} color="#7D7968" />
             </Pressable>
           </View>
@@ -94,8 +117,8 @@ export default function ShowNotesScreen() {
 
   const loadingComponent = () => {
     return (
-      <View>
-        <Text>Loading...</Text>
+      <View style={styles.loading}>
+        <Text style={[styles.loadingText, styles.customText]}>Loading...</Text>
       </View>
     );
   };
@@ -107,17 +130,11 @@ export default function ShowNotesScreen() {
         data={notes}
         keyExtractor={(note) => note.id}
         renderItem={renderItem}
-        ListEmptyComponent={
-          isNotesLoading
-            ? loadingComponent
-            : notes.length === 0
-            ? emptyComponent
-            : null
-        }
+        ListEmptyComponent={isNotesLoading && loadingComponent}
         showsVerticalScrollIndicator={false}
-      ></FlatList>
+      />
       <Pressable style={styles.addButton} onPress={handleAddPress}>
-        <AntDesign name="plus" size={20} color="#FFF5CF" />
+        <AntDesign name="plus" size={25} color="#FFF5CF" />
       </Pressable>
       <StatusBar style="dark" backgroundColor="#FFF5CF" />
     </SafeAreaView>
@@ -178,8 +195,8 @@ const styles = StyleSheet.create({
   addButton: {
     backgroundColor: "#F89348",
     borderRadius: "100%",
-    height: 40,
-    width: 40,
+    height: 50,
+    width: 50,
     display: "flex",
     flexDirection: "row",
     justifyContent: "center",
@@ -200,5 +217,17 @@ const styles = StyleSheet.create({
     fontWeight: "medium",
     color: "black",
     textAlign: "center",
+  },
+  loading: {
+    height: "100%",
+    width: "100%",
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingText: {
+    fontSize: 50,
+    color: "black",
+    fontWeight: 600,
   },
 });

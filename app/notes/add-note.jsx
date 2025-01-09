@@ -22,7 +22,7 @@ export default function AddNoteScreen() {
     async function getUserId() {
       try {
         let storedId = await AsyncStorage.getItem("user-id");
-        console.log(storedId);
+        // console.log(storedId);
         if (storedId) {
           setUserId(storedId);
         } else {
@@ -42,20 +42,22 @@ export default function AddNoteScreen() {
   };
 
   const handleAddNote = async () => {
-    if (note.title.trim() !== "" && note.description.trim() !== "") {
-      if (userId !== "") {
-        setIsAdding(true);
-        try {
-          const userNotesRef = collection(db, `users/${userId}/notes`);
-          const addedNoteId = await addDoc(userNotesRef, note);
-          console.log(addedNoteId.id);
-        } catch (error) {
-          console.error(`Error saving note ${note}`);
-          setIsAdding(false);
-        } finally {
-          setIsAdding(false);
-        }
-      }
+    if (
+      (note.title.trim() === "" && note.description.trim() === "") ||
+      userId === ""
+    )
+      return;
+    setIsAdding(true);
+    try {
+      const userNotesRef = collection(db, `users/${userId}/notes`);
+      const addedNoteId = await addDoc(userNotesRef, note);
+      console.log(addedNoteId.id);
+      console.log("New note added successfully");
+    } catch (error) {
+      console.error(`Error saving note ${note}`);
+      setIsAdding(false);
+    } finally {
+      setIsAdding(false);
     }
   };
 
@@ -90,7 +92,6 @@ export default function AddNoteScreen() {
           value={note.description !== "" ? note.description : ""}
         />
       </View>
-      {/* <Text>{userId}</Text> */}
     </SafeAreaView>
   );
 }
