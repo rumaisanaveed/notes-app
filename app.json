@@ -30,9 +30,9 @@
     },
     "splash": {
       "image": "./assets/images/splash-icon.png",
-      "resizeMode": "contain",
+      "resizeMode": "cover",
       "backgroundColor": "#FFF5CF",
-      "imageWidth": 50
+      "imageWidth": 100
     },
     "plugins": [
       "expo-router",
@@ -40,8 +40,8 @@
         "expo-splash-screen",
         {
           "image": "./assets/images/splash-icon.png",
-          "imageWidth": 50,
-          "resizeMode": "contain",
+          "imageWidth": 100,
+          "resizeMode": "cover",
           "backgroundColor": "#FFF5CF"
         }
       ]
