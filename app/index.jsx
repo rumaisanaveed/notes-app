@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from "react";
-import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { collection, deleteDoc, doc, getDocs } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -8,14 +8,9 @@ import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import AppContext from "@/context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
-// tasks
-// fix the issue of loading and not found screen
-// add animations
-// add env file
-// test
-// prepare github readme
-// post on linkedin
+import { truncateText } from "@/utils/truncateText";
+import Animated, { LinearTransition } from "react-native-reanimated";
+import { showToast } from "@/utils/showToast";
 
 export default function ShowNotesScreen() {
   const [notes, setNotes] = useState([]);
@@ -78,9 +73,19 @@ export default function ShowNotesScreen() {
       const noteRef = doc(db, `users/${userId}/notes`, noteId);
       await deleteDoc(noteRef);
       console.log("Note deleted successfully");
-      getNotes();
+      showToast({
+        type: "success",
+        text1: "Note deleted successfully..",
+      });
+      setTimeout(() => {
+        getNotes();
+      }, 2000);
     } catch (error) {
       console.error(error);
+      showToast({
+        type: "error",
+        text1: "Error deleting note...",
+      });
     }
   };
 
@@ -100,25 +105,9 @@ export default function ShowNotesScreen() {
             </Pressable>
           </View>
         </View>
-        <Text style={styles.noteDescription}>{item.description}</Text>
-      </View>
-    );
-  };
-
-  const emptyComponent = () => {
-    return (
-      <View style={styles.emptyContainer}>
-        <Text style={styles.emptyText}>
-          Oops! No notes found.. Go and add some notes and come back here :)
+        <Text style={styles.noteDescription}>
+          {truncateText(item.description) + "..."}
         </Text>
-      </View>
-    );
-  };
-
-  const loadingComponent = () => {
-    return (
-      <View style={styles.loading}>
-        <Text style={[styles.loadingText, styles.customText]}>Loading...</Text>
       </View>
     );
   };
@@ -126,13 +115,30 @@ export default function ShowNotesScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <Text style={[styles.heading, styles.customText]}>My Notes</Text>
-      <FlatList
-        data={notes}
-        keyExtractor={(note) => note.id}
-        renderItem={renderItem}
-        ListEmptyComponent={isNotesLoading && loadingComponent}
-        showsVerticalScrollIndicator={false}
-      />
+      {isNotesLoading && (
+        <View style={styles.containerCentered}>
+          <Text style={[styles.loadingText, styles.customText]}>
+            Loading...
+          </Text>
+        </View>
+      )}
+      {!isNotesLoading && notes.length > 0 && (
+        <Animated.FlatList
+          data={notes}
+          keyExtractor={(note) => note.id}
+          renderItem={renderItem}
+          showsVerticalScrollIndicator={false}
+          itemLayoutAnimation={LinearTransition}
+          keyboardDismissMode="on-drag"
+        />
+      )}
+      {!isNotesLoading && notes.length === 0 && (
+        <View style={styles.containerCentered}>
+          <Text style={styles.emptyText}>
+            Oops! No notes found.. Go and add some notes and come back here :|
+          </Text>
+        </View>
+      )}
       <Pressable style={styles.addButton} onPress={handleAddPress}>
         <AntDesign name="plus" size={25} color="#FFF5CF" />
       </Pressable>
@@ -205,10 +211,8 @@ const styles = StyleSheet.create({
     bottom: 20,
     right: 20,
   },
-  emptyContainer: {
-    height: "100%",
-    width: "100%",
-    display: "flex",
+  containerCentered: {
+    flex: 1,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -217,13 +221,6 @@ const styles = StyleSheet.create({
     fontWeight: "medium",
     color: "black",
     textAlign: "center",
-  },
-  loading: {
-    height: "100%",
-    width: "100%",
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
   },
   loadingText: {
     fontSize: 50,

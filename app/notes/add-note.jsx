@@ -8,6 +8,7 @@ import AppContext from "@/context";
 import { addDoc, collection } from "firebase/firestore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { db } from "@/firebaseConfig";
+import { showToast } from "@/utils/showToast";
 
 export default function AddNoteScreen() {
   const router = useRouter();
@@ -16,7 +17,6 @@ export default function AddNoteScreen() {
     title: "",
     description: "",
   });
-  const [isAdding, setIsAdding] = useState(false);
 
   useEffect(() => {
     async function getUserId() {
@@ -47,17 +47,23 @@ export default function AddNoteScreen() {
       userId === ""
     )
       return;
-    setIsAdding(true);
     try {
       const userNotesRef = collection(db, `users/${userId}/notes`);
       const addedNoteId = await addDoc(userNotesRef, note);
       console.log(addedNoteId.id);
-      console.log("New note added successfully");
+      showToast({
+        type: "success",
+        text1: "Note saved successfully..",
+      });
+      setTimeout(() => {
+        router.push("/");
+      }, 1000);
     } catch (error) {
       console.error(`Error saving note ${note}`);
-      setIsAdding(false);
-    } finally {
-      setIsAdding(false);
+      showToast({
+        type: "error",
+        text1: "Error saving note..",
+      });
     }
   };
 
@@ -67,7 +73,7 @@ export default function AddNoteScreen() {
         <Pressable onPress={handleArrowPress}>
           <AntDesign name="arrowleft" size={24} color="#7D7968" />
         </Pressable>
-        <Pressable onPress={handleAddNote} disabled={isAdding}>
+        <Pressable onPress={handleAddNote}>
           <Text style={[styles.doneText, styles.customText]}>Done</Text>
         </Pressable>
       </View>

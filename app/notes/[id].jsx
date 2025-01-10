@@ -6,6 +6,7 @@ import { useContext, useEffect, useState } from "react";
 import AppContext from "@/context";
 import { collection, doc, getDocs, setDoc } from "firebase/firestore";
 import { db } from "@/firebaseConfig";
+import { showToast } from "@/utils/showToast";
 
 export default function EditNoteScreen() {
   const { id: noteId } = useLocalSearchParams();
@@ -15,11 +16,9 @@ export default function EditNoteScreen() {
     title: "",
     description: "",
   });
-  const [isEditing, setIsEditing] = useState(false);
 
   const getNote = async () => {
     if (!userId || !noteId) return;
-    setIsEditing(true);
     try {
       const querySnapshot = await getDocs(
         collection(db, `users/${userId}/notes`)
@@ -37,8 +36,6 @@ export default function EditNoteScreen() {
       }
     } catch (error) {
       console.error(error);
-    } finally {
-      setIsEditing(false);
     }
   };
 
@@ -56,8 +53,19 @@ export default function EditNoteScreen() {
       const docRef = doc(db, `users/${userId}/notes/${noteId}`);
       await setDoc(docRef, note, { merge: true });
       console.log("Note updated successfully");
+      showToast({
+        type: "success",
+        text1: "Note updated successfully...",
+      });
+      setTimeout(() => {
+        handleArrowPress();
+      }, 1000);
     } catch (error) {
       console.error(`Error editing note ${error}`);
+      showToast({
+        type: "error",
+        text1: "Error updating note..",
+      });
     }
   };
 
