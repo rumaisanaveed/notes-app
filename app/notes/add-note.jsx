@@ -3,7 +3,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { useRouter } from "expo-router";
 import { useContext, useEffect, useState } from "react";
-import { v4 as uuidv4 } from "uuid";
+import uuid from "react-native-uuid";
 import AppContext from "@/context";
 import { addDoc, collection } from "firebase/firestore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -26,7 +26,7 @@ export default function AddNoteScreen() {
         if (storedId) {
           setUserId(storedId);
         } else {
-          const generatedId = uuidv4();
+          const generatedId = uuid.v4();
           await AsyncStorage.setItem("user-id", generatedId);
           setUserId(generatedId);
         }
