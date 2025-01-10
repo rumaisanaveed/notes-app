@@ -94,14 +94,13 @@ export default function ShowNotesScreen() {
       const noteRef = doc(db, `users/${userId}/notes`, noteId);
       await deleteDoc(noteRef);
       console.log("Note deleted successfully");
-      const newNotes = notes.filter((note) => note.id !== noteId);
-      setNotes(newNotes);
     } catch (error) {
       console.error(error);
       showToast({
         type: "error",
         text1: "Error deleting note...",
       });
+      // if the note fails due to some error
       setNotes((prevNotes) => [
         ...prevNotes,
         notes.find((note) => note.id === noteId),
