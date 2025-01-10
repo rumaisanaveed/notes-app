@@ -1,6 +1,13 @@
 import { useContext, useEffect, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { collection, deleteDoc, doc, getDocs } from "firebase/firestore";
+import {
+  collection,
+  deleteDoc,
+  doc,
+  getDocs,
+  orderBy,
+  query,
+} from "firebase/firestore";
 import { db } from "../firebaseConfig";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AntDesign from "@expo/vector-icons/AntDesign";
@@ -11,6 +18,12 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { truncateText } from "@/utils/truncateText";
 import Animated, { LinearTransition } from "react-native-reanimated";
 import { showToast } from "@/utils/showToast";
+import globalStyles from "@/styles/globalStyles";
+
+// env file
+// build
+// github readme
+// linkedin post
 
 export default function ShowNotesScreen() {
   const [notes, setNotes] = useState([]);
@@ -25,9 +38,9 @@ export default function ShowNotesScreen() {
     }
     setIsNotesLoading(true);
     try {
-      const querySnapshot = await getDocs(
-        collection(db, `users/${userId}/notes`)
-      );
+      const userNotesRef = collection(db, `users/${userId}/notes`);
+      const notesQuery = query(userNotesRef, orderBy("timestamp", "desc"));
+      const querySnapshot = await getDocs(notesQuery);
       const notesArray = [];
       querySnapshot.forEach((doc) =>
         notesArray.push({ id: doc.id, ...doc.data() })
@@ -61,31 +74,38 @@ export default function ShowNotesScreen() {
     router.push("/notes/add-note");
   };
 
-  const handleEditPress = (noteId) => {
-    router.push(`/notes/${noteId}`);
+  const handleEditPress = ({ id, title, description }) => {
+    router.push({
+      pathname: `/notes/${id}`,
+      params: {
+        title: title,
+        description: description,
+      },
+    });
   };
 
   const handleDeletePress = async (noteId) => {
     if (!noteId) {
       return;
     }
+    const newNotes = notes.filter((note) => note.id !== noteId);
+    setNotes(newNotes);
     try {
       const noteRef = doc(db, `users/${userId}/notes`, noteId);
       await deleteDoc(noteRef);
       console.log("Note deleted successfully");
-      showToast({
-        type: "success",
-        text1: "Note deleted successfully..",
-      });
-      setTimeout(() => {
-        getNotes();
-      }, 2000);
+      const newNotes = notes.filter((note) => note.id !== noteId);
+      setNotes(newNotes);
     } catch (error) {
       console.error(error);
       showToast({
         type: "error",
         text1: "Error deleting note...",
       });
+      setNotes((prevNotes) => [
+        ...prevNotes,
+        notes.find((note) => note.id === noteId),
+      ]);
     }
   };
 
@@ -93,11 +113,11 @@ export default function ShowNotesScreen() {
     return (
       <View style={styles.noteItem}>
         <View style={styles.noteItemRow}>
-          <Text style={[styles.customText, styles.noteTitle]}>
+          <Text style={[globalStyles.customText, styles.noteTitle]}>
             {item.title}
           </Text>
           <View style={styles.iconsRow}>
-            <Pressable onPress={() => handleEditPress(item.id)}>
+            <Pressable onPress={() => handleEditPress(item)}>
               <AntDesign name="edit" size={18} color="#7D7968" />
             </Pressable>
             <Pressable onPress={() => handleDeletePress(item.id)}>
@@ -113,11 +133,11 @@ export default function ShowNotesScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <Text style={[styles.heading, styles.customText]}>My Notes</Text>
+    <SafeAreaView style={globalStyles.container}>
+      <Text style={[styles.heading, globalStyles.customText]}>My Notes</Text>
       {isNotesLoading && (
         <View style={styles.containerCentered}>
-          <Text style={[styles.loadingText, styles.customText]}>
+          <Text style={[styles.loadingText, globalStyles.customText]}>
             Loading...
           </Text>
         </View>
@@ -148,20 +168,11 @@ export default function ShowNotesScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    backgroundColor: "#FFF5CF",
-    padding: 20,
-    height: "100%",
-    width: "100%",
-  },
   heading: {
     fontSize: 48,
     fontWeight: 600,
     maxWidth: 150,
     marginBottom: 20,
-  },
-  customText: {
-    fontFamily: "Poppins-Regular",
   },
   noteItem: {
     borderColor: "#E8E0C0",
@@ -223,7 +234,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   loadingText: {
-    fontSize: 50,
+    fontSize: 30,
     color: "black",
     fontWeight: 600,
   },

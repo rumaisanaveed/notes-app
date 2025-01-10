@@ -5,10 +5,11 @@ import { useRouter } from "expo-router";
 import { useContext, useEffect, useState } from "react";
 import uuid from "react-native-uuid";
 import AppContext from "@/context";
-import { addDoc, collection } from "firebase/firestore";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { db } from "@/firebaseConfig";
 import { showToast } from "@/utils/showToast";
+import globalStyles from "@/styles/globalStyles";
 
 export default function AddNoteScreen() {
   const router = useRouter();
@@ -49,15 +50,12 @@ export default function AddNoteScreen() {
       return;
     try {
       const userNotesRef = collection(db, `users/${userId}/notes`);
-      const addedNoteId = await addDoc(userNotesRef, note);
-      console.log(addedNoteId.id);
-      showToast({
-        type: "success",
-        text1: "Note saved successfully..",
+      const addedNoteId = await addDoc(userNotesRef, {
+        ...note,
+        timestamp: serverTimestamp(),
       });
-      setTimeout(() => {
-        router.push("/");
-      }, 1000);
+      console.log(addedNoteId.id);
+      handleArrowPress();
     } catch (error) {
       console.error(`Error saving note ${note}`);
       showToast({
@@ -68,13 +66,15 @@ export default function AddNoteScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.row}>
+    <SafeAreaView style={globalStyles.container}>
+      <View style={globalStyles.row}>
         <Pressable onPress={handleArrowPress}>
           <AntDesign name="arrowleft" size={24} color="#7D7968" />
         </Pressable>
         <Pressable onPress={handleAddNote}>
-          <Text style={[styles.doneText, styles.customText]}>Done</Text>
+          <Text style={[globalStyles.doneText, globalStyles.customText]}>
+            Done
+          </Text>
         </Pressable>
       </View>
       <View
@@ -84,67 +84,30 @@ export default function AddNoteScreen() {
       >
         <TextInput
           maxLength={30}
-          style={[styles.inputContainer, styles.input, styles.customText]}
+          style={[
+            globalStyles.inputContainer,
+            globalStyles.input,
+            globalStyles.customText,
+          ]}
           placeholder="Enter note title here..."
           onChangeText={(text) => setNote({ ...note, title: text })}
           value={note.title !== "" ? note.title : ""}
+          placeholderTextColor="#7D7968"
         />
         <TextInput
-          style={[styles.textAreaContainer, styles.input, styles.customText]}
+          style={[
+            globalStyles.textAreaContainer,
+            globalStyles.input,
+            globalStyles.customText,
+          ]}
           placeholder="Enter note description here..."
           numberOfLines={12}
           multiline={true}
           onChangeText={(text) => setNote({ ...note, description: text })}
           value={note.description !== "" ? note.description : ""}
+          placeholderTextColor="#6C6C6C"
         />
       </View>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: "#FFF5CF",
-    padding: 20,
-    height: "100%",
-    width: "100%",
-    flex: 1,
-  },
-  row: {
-    display: "flex",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    width: "100%",
-  },
-  doneText: {
-    color: "#F89348",
-    fontSize: 18,
-    fontWeight: "regular",
-  },
-  customText: {
-    fontFamily: "Poppins-Regular",
-  },
-  input: {
-    width: "100%",
-    paddingVertical: 20,
-    paddingHorizontal: 15,
-    borderWidth: 1,
-    borderColor: "#CCC",
-    borderRadius: 8,
-  },
-  inputContainer: {
-    fontSize: 20,
-    fontWeight: "medium",
-    color: "#7D7968",
-  },
-  textAreaContainer: {
-    marginTop: 12,
-    color: "#6C6C6C",
-    fontWeight: "light",
-    fontSize: 16,
-    height: 300,
-    textAlignVertical: "top",
-    minHeight: 150,
-    paddingVertical: 10,
-  },
-});
