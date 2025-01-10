@@ -1,50 +1,95 @@
-# Welcome to your Expo app 👋
+# 📱 Noto
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+As I was exploring React Native using Expo for a week, I decided to create a simple project to implement what I learned.  
+So, here's my mini app: **Noto**! 🎉
 
-## Get started
+---
 
-1. Install dependencies
+## 📝 Introduction
 
+Noto is a mobile app built with **Expo (React Native)** and **Firebase**. It's a small project where users can:  
+1. Create notes.  
+2. Read notes.  
+3. Update notes.  
+4. Delete notes.  
+
+---
+
+## 🛠️ Tech Stack
+- **Expo**  
+- **Firebase**  
+- **React Native**  
+- **React**  
+
+---
+
+## ✨ Features
+Here's what you can do with Noto:  
+1. Add a note with a title and description.  
+2. Update existing notes.  
+3. View all added notes.  
+4. Delete specific notes.  
+
+---
+
+## 🛣️ The Process
+
+### 🔧 Backend Part  
+First, I decided to create a unique ID for each user (since I haven't added authentication yet).  
+Each user has a `notes` collection to store multiple notes (as documents).  
+
+The backend structure looks like this:  
+```
+users collection / user-id / notes collection / note-id
+```
+
+---
+
+### 🎨 Frontend Part  
+1. I started by building the UI using `StyleSheet`.  
+2. Integrated Firebase.  
+3. Generated a user ID and saved it in **Async Storage** so the user's notes can be displayed easily.  
+4. Used React's **Context API** to store the user ID and access it anywhere in the app.  
+5. Implemented the note-adding functionality using Firebase's `addDoc` method.  
+6. Displayed the added notes using the `getDocs` method. This step taught me something new about setting up the notes array.  
+7. Added note deletion functionality using the `deleteDoc` method.  
+8. For updating notes:  
+   - Initially, I fetched the note from Firebase, but this caused delays and a poor user experience.  
+   - To improve the UX, I passed the note data via the `params` object from the "All Notes" page, which made editing smoother.  
+   - Updated the note in Firebase using the `setDoc` method.  
+
+---
+
+## 📚 What I Learned
+1. **Using Custom Fonts**: Encountered an issue but solved it with some help from Google.  
+2. **Displaying Recent Notes**:  
+   - Initially, the last added note was not appearing at the top.  
+   - Learned to add a `timestamp` field and fetch data in descending order to show recent notes first.  
+3. **Environment Variables**:  
+   - Struggled to load `.env` variables in the web environment.  
+   - After researching for a few days, I found a solution (which I'll share in an article soon). This was my biggest learning moment so far!  
+
+---
+
+## 🚀 How to Run the Project
+1. Install all dependencies:  
    ```bash
    npm install
    ```
-
-2. Start the app
-
+2. Start the project:  
    ```bash
-    npx expo start
+   npx expo start
    ```
+3. View the app using the **Expo Go** app.
 
-In the output, you'll find options to open the app in a
+---
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## 🎥 Video Demo
+I'm running the app in development mode because I faced some issues building it.  
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+https://github.com/user-attachments/assets/d4a25ce2-9104-4264-a55a-2418b295f1ad
 
-## Get a fresh project
+---
 
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+Thank you for checking out Noto! 😊  
+Happy Coding 🤍 - Rumaisa Naveed
