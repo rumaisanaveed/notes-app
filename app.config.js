@@ -4,6 +4,5 @@ const env = Object.fromEntries(
 
 export default ({ config }) => ({
   ...config,
-  // ...
   extra: { env },
 });

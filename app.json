@@ -11,7 +11,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#FFF5CF"
+        "backgroundColor": "#000000"
       },
       "statusBar": {
         "backgroundColor": "#000000",
@@ -48,6 +48,15 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "env": {},
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "f5ba3923-9188-4f39-b84c-4457d9efa442"
+      }
     }
   }
 }
