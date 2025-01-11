@@ -10,12 +10,18 @@ export default function RootLayout() {
 
   if (fontsLoaded === null) return;
 
+  // loading all the env variables
+
   useEffect(() => {
+    // getting that env object from app.config file
     const env = Constants.expoConfig?.extra?.env;
 
+    // to make sure that we don't get undefined
     if (env && typeof env === "object") {
       Object.entries(env).forEach(([key, value]) => {
+        // if the env variables are not already set or the env variables doesn't start with EXPO_PUBLIC
         if (!key.startsWith("EXPO_PUBLIC_") || process.env[key]) return;
+        // set the env variables with the values getting from the env object
         process.env[key] = `${value}`;
       });
     }

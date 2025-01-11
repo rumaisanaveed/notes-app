@@ -20,11 +20,6 @@ import Animated, { LinearTransition } from "react-native-reanimated";
 import { showToast } from "@/utils/showToast";
 import globalStyles from "@/styles/globalStyles";
 
-// env file
-// build
-// github readme
-// linkedin post
-
 export default function ShowNotesScreen() {
   const [notes, setNotes] = useState([]);
   const router = useRouter();
