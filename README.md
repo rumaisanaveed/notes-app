@@ -72,15 +72,18 @@ users collection / user-id / notes collection / note-id
 ---
 
 ## 🚀 How to Run the Project
-1. Install all dependencies:  
+1. First, create a Firebase project and add the Firebase configuration file to your app. Then, create a .env file and replace the environment
+variables with the ones provided by Firebase after creating the project.
+
+2. Install all dependencies:  
    ```bash
    npm install
    ```
-2. Start the project:  
+3. Start the project:  
    ```bash
    npx expo start
    ```
-3. View the app using the **Expo Go** app.
+4. View the app using the **Expo Go** app.
 
 ---
 
